@@ -1,3 +1,4 @@
+
 import {
 	Flex,
 	Box,
@@ -26,19 +27,15 @@ export default function LoginCard() {
 	const setUser = useSetRecoilState(userAtom);
 	const [loading, setLoading] = useState(false);
 
-	const [inputs, setInputs] = useState({
-		username: "",
-		password: "",
-	});
+	const [inputs, setInputs] = useState({ username: "", password: "" });
 	const showToast = useShowToast();
+
 	const handleLogin = async () => {
 		setLoading(true);
 		try {
 			const res = await fetch("/api/users/login", {
 				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(inputs),
 			});
 			const data = await res.json();
@@ -49,75 +46,76 @@ export default function LoginCard() {
 			localStorage.setItem("user-threads", JSON.stringify(data));
 			setUser(data);
 		} catch (error) {
-			showToast("Error", error, "error");
+			showToast("Error", error.message, "error");
 		} finally {
 			setLoading(false);
 		}
 	};
+
+	const cardBg = useColorModeValue("white", "gray.800");
+	const cardShadow = useColorModeValue("lg", "dark-lg");
+	const inputBg = useColorModeValue("gray.50", "gray.700");
+	const buttonBg = useColorModeValue("blue.500", "blue.400");
+	const buttonHover = useColorModeValue("blue.600", "blue.500");
+	const textColor = useColorModeValue("gray.800", "gray.100");
+
 	return (
-		<Flex align={"center"} justify={"center"}>
-			<Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
-				<Stack align={"center"}>
-					<Heading fontSize={"4xl"} textAlign={"center"}>
+		<Flex minH="100vh" align="center" justify="center" bg={useColorModeValue("gray.50", "gray.900")} px={4}>
+			<Stack spacing={8} mx="auto" maxW="lg" py={12} px={6}>
+				<Stack align="center">
+					<Heading fontSize="4xl" textAlign="center" color={textColor}>
 						Login
 					</Heading>
 				</Stack>
-				<Box
-					rounded={"lg"}
-					bg={useColorModeValue("white", "gray.dark")}
-					boxShadow={"lg"}
-					p={8}
-					w={{
-						base: "full",
-						sm: "400px",
-					}}
-				>
+				<Box rounded="2xl" bg={cardBg} boxShadow={cardShadow} p={8} w={{ base: "full", sm: "400px" }}>
 					<Stack spacing={4}>
 						<FormControl isRequired>
 							<FormLabel>Username</FormLabel>
 							<Input
-								type='text'
+								type="text"
+								bg={inputBg}
 								value={inputs.username}
-								onChange={(e) => setInputs((inputs) => ({ ...inputs, username: e.target.value }))}
+								onChange={(e) => setInputs((prev) => ({ ...prev, username: e.target.value }))}
 							/>
 						</FormControl>
+
 						<FormControl isRequired>
 							<FormLabel>Password</FormLabel>
 							<InputGroup>
 								<Input
 									type={showPassword ? "text" : "password"}
+									bg={inputBg}
 									value={inputs.password}
-									onChange={(e) => setInputs((inputs) => ({ ...inputs, password: e.target.value }))}
+									onChange={(e) => setInputs((prev) => ({ ...prev, password: e.target.value }))}
 								/>
-								<InputRightElement h={"full"}>
-									<Button
-										variant={"ghost"}
-										onClick={() => setShowPassword((showPassword) => !showPassword)}
-									>
+								<InputRightElement h="full">
+									<Button variant="ghost" onClick={() => setShowPassword((prev) => !prev)}>
 										{showPassword ? <ViewIcon /> : <ViewOffIcon />}
 									</Button>
 								</InputRightElement>
 							</InputGroup>
 						</FormControl>
+
 						<Stack spacing={10} pt={2}>
 							<Button
-								loadingText='Logging in'
-								size='lg'
-								bg={useColorModeValue("gray.600", "gray.700")}
-								color={"white"}
-								_hover={{
-									bg: useColorModeValue("gray.700", "gray.800"),
-								}}
+								loadingText="Logging in"
+								size="lg"
+								bg={buttonBg}
+								color="white"
+								_hover={{ bg: buttonHover }}
 								onClick={handleLogin}
 								isLoading={loading}
+								borderRadius="xl"
+								boxShadow="md"
 							>
 								Login
 							</Button>
 						</Stack>
+
 						<Stack pt={6}>
-							<Text align={"center"}>
+							<Text align="center" color={textColor}>
 								Don&apos;t have an account?{" "}
-								<Link color={"blue.400"} onClick={() => setAuthScreen("signup")}>
+								<Link color="blue.400" onClick={() => setAuthScreen("signup")}>
 									Sign up
 								</Link>
 							</Text>

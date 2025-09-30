@@ -1,4 +1,14 @@
-import { Avatar, Box, Button, Divider, Flex, Image, Spinner, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Image,
+  Spinner,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import Actions from "../components/Actions";
 import { useEffect } from "react";
 import Comment from "../components/Comment";
@@ -12,118 +22,135 @@ import { DeleteIcon } from "@chakra-ui/icons";
 import postsAtom from "../atoms/postsAtom";
 
 const PostPage = () => {
-	const { user, loading } = useGetUserProfile();
-	const [posts, setPosts] = useRecoilState(postsAtom);
-	const showToast = useShowToast();
-	const { pid } = useParams();
-	const currentUser = useRecoilValue(userAtom);
-	const navigate = useNavigate();
+  const { user, loading } = useGetUserProfile();
+  const [posts, setPosts] = useRecoilState(postsAtom);
+  const showToast = useShowToast();
+  const { pid } = useParams();
+  const currentUser = useRecoilValue(userAtom);
+  const navigate = useNavigate();
 
-	const currentPost = posts[0];
+  const currentPost = posts[0];
 
-	useEffect(() => {
-		const getPost = async () => {
-			setPosts([]);
-			try {
-				const res = await fetch(`/api/posts/${pid}`);
-				const data = await res.json();
-				if (data.error) {
-					showToast("Error", data.error, "error");
-					return;
-				}
-				setPosts([data]);
-			} catch (error) {
-				showToast("Error", error.message, "error");
-			}
-		};
-		getPost();
-	}, [showToast, pid, setPosts]);
+  useEffect(() => {
+    const getPost = async () => {
+      setPosts([]);
+      try {
+        const res = await fetch(`/api/posts/${pid}`);
+        const data = await res.json();
+        if (data.error) {
+          showToast("Error", data.error, "error");
+          return;
+        }
+        setPosts([data]);
+      } catch (error) {
+        showToast("Error", error.message, "error");
+      }
+    };
+    getPost();
+  }, [showToast, pid, setPosts]);
 
-	const handleDeletePost = async () => {
-		try {
-			if (!window.confirm("Are you sure you want to delete this post?")) return;
+  const handleDeletePost = async () => {
+    try {
+      if (!window.confirm("Are you sure you want to delete this post?")) return;
 
-			const res = await fetch(`/api/posts/${currentPost._id}`, {
-				method: "DELETE",
-			});
-			const data = await res.json();
-			if (data.error) {
-				showToast("Error", data.error, "error");
-				return;
-			}
-			showToast("Success", "Post deleted", "success");
-			navigate(`/${user.username}`);
-		} catch (error) {
-			showToast("Error", error.message, "error");
-		}
-	};
+      const res = await fetch(`/api/posts/${currentPost._id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.error) {
+        showToast("Error", data.error, "error");
+        return;
+      }
+      showToast("Success", "Post deleted", "success");
+      navigate(`/${user.username}`);
+    } catch (error) {
+      showToast("Error", error.message, "error");
+    }
+  };
 
-	if (!user && loading) {
-		return (
-			<Flex justifyContent={"center"}>
-				<Spinner size={"xl"} />
-			</Flex>
-		);
-	}
+  if (!user && loading) {
+    return (
+      <Flex justifyContent="center" mt={10}>
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
 
-	if (!currentPost) return null;
-	console.log("currentPost", currentPost);
+  if (!currentPost) return null;
 
-	return (
-		<>
-			<Flex>
-				<Flex w={"full"} alignItems={"center"} gap={3}>
-					<Avatar src={user.profilePic} size={"md"} name='Mark Zuckerberg' />
-					<Flex>
-						<Text fontSize={"sm"} fontWeight={"bold"}>
-							{user.username}
-						</Text>
-						<Image src='/verified.png' w='4' h={4} ml={4} />
-					</Flex>
-				</Flex>
-				<Flex gap={4} alignItems={"center"}>
-					<Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"}>
-						{formatDistanceToNow(new Date(currentPost.createdAt))} ago
-					</Text>
+  const textColor = useColorModeValue("gray.800", "gray.100");
+  const secondaryText = useColorModeValue("gray.500", "gray.400");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
 
-					{currentUser?._id === user._id && (
-						<DeleteIcon size={20} cursor={"pointer"} onClick={handleDeletePost} />
-					)}
-				</Flex>
-			</Flex>
+  return (
+    <Box maxW="700px" mx="auto" my={6} px={2}>
+      {/* Header */}
+      <Flex justifyContent="space-between" alignItems="center" mb={3}>
+        <Flex gap={3} alignItems="center">
+          <Avatar src={user.profilePic} name={user.username} />
+          <Box>
+            <Text fontWeight="bold" color={textColor}>
+              {user.username}
+            </Text>
+            <Text fontSize="sm" color={secondaryText}>
+              {formatDistanceToNow(new Date(currentPost.createdAt))} ago
+            </Text>
+          </Box>
+        </Flex>
+        {currentUser?._id === user._id && (
+          <DeleteIcon
+            cursor="pointer"
+            color="red.400"
+            _hover={{ color: "red.600" }}
+            onClick={handleDeletePost}
+          />
+        )}
+      </Flex>
 
-			<Text my={3}>{currentPost.text}</Text>
+      {/* Post Content */}
+      <Text fontSize="md" color={textColor} mb={3} lineHeight="1.6">
+        {currentPost.text}
+      </Text>
 
-			{currentPost.img && (
-				<Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
-					<Image src={currentPost.img} w={"full"} />
-				</Box>
-			)}
+      {currentPost.img && (
+        <Box borderRadius="md" overflow="hidden" border={`1px solid ${borderColor}`} mb={3}>
+          <Image src={currentPost.img} w="full" />
+        </Box>
+      )}
 
-			<Flex gap={3} my={3}>
-				<Actions post={currentPost} />
-			</Flex>
+      {/* Actions */}
+      <Flex mb={4}>
+        <Actions post={currentPost} />
+      </Flex>
 
-			<Divider my={4} />
+      <Divider mb={4} />
 
-			<Flex justifyContent={"space-between"}>
-				<Flex gap={2} alignItems={"center"}>
-					<Text fontSize={"2xl"}>👋</Text>
-					<Text color={"gray.light"}>Get the app to like, reply and post.</Text>
-				</Flex>
-				<Button>Get</Button>
-			</Flex>
+      {/* App Promo */}
+      <Flex justifyContent="space-between" alignItems="center" mb={4}>
+        <Flex gap={2} alignItems="center">
+          <Text fontSize="2xl">👋</Text>
+          <Text color={secondaryText}>Get the app to like, reply and post.</Text>
+        </Flex>
+        <Button size="sm" colorScheme="blue">
+          Get
+        </Button>
+      </Flex>
 
-			<Divider my={4} />
-			{currentPost.replies.map((reply) => (
-				<Comment
-					key={reply._id}
-					reply={reply}
-					lastReply={reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
-				/>
-			))}
-		</>
-	);
+      <Divider mb={4} />
+
+      {/* Comments */}
+      <Box>
+        {currentPost.replies.map((reply) => (
+          <Comment
+            key={reply._id}
+            reply={reply}
+            lastReply={reply._id === currentPost.replies[currentPost.replies.length - 1]._id}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
 };
 
 export default PostPage;
+

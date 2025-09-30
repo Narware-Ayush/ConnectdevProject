@@ -1,4 +1,5 @@
-import { Box, Flex, Spinner } from "@chakra-ui/react";
+
+import { Box, Flex, Spinner, Text, useColorModeValue } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import Post from "../components/Post";
@@ -7,57 +8,72 @@ import postsAtom from "../atoms/postsAtom";
 import SuggestedUsers from "../components/SuggestedUsers";
 
 const HomePage = () => {
-	const [posts, setPosts] = useRecoilState(postsAtom);
-	const [loading, setLoading] = useState(true);
-	const showToast = useShowToast();
-	useEffect(() => {
-		const getFeedPosts = async () => {
-			setLoading(true);
-			setPosts([]);
-			try {
-				const res = await fetch("/api/posts/feed");
-				const data = await res.json();
-				if (data.error) {
-					showToast("Error", data.error, "error");
-					return;
-				}
-				console.log(data);
-				setPosts(data);
-			} catch (error) {
-				showToast("Error", error.message, "error");
-			} finally {
-				setLoading(false);
-			}
-		};
-		getFeedPosts();
-	}, [showToast, setPosts]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
+  const [loading, setLoading] = useState(true);
+  const showToast = useShowToast();
 
-	return (
-		<Flex gap='10' alignItems={"flex-start"}>
-			<Box flex={70}>
-				{!loading && posts.length === 0 && <h1>Follow some users to see the feed</h1>}
+  const emptyTextColor = useColorModeValue("gray.600", "gray.300");
 
-				{loading && (
-					<Flex justify='center'>
-						<Spinner size='xl' />
-					</Flex>
-				)}
+  useEffect(() => {
+    const getFeedPosts = async () => {
+      setLoading(true);
+      setPosts([]);
+      try {
+        const res = await fetch("/api/posts/feed");
+        const data = await res.json();
+        if (data.error) {
+          showToast("Error", data.error, "error");
+          return;
+        }
+        setPosts(data);
+      } catch (error) {
+        showToast("Error", error.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    getFeedPosts();
+  }, [showToast, setPosts]);
 
-				{posts.map((post) => (
-					<Post key={post._id} post={post} postedBy={post.postedBy} />
-				))}
-			</Box>
-			<Box
-				flex={30}
-				display={{
-					base: "none",
-					md: "block",
-				}}
-			>
-				<SuggestedUsers />
-			</Box>
-		</Flex>
-	);
+  return (
+    <Flex
+      gap={10}
+      alignItems="flex-start"
+      justify="center"
+      px={{ base: 4, md: 10 }}
+      py={6}
+      flexWrap={{ base: "wrap", md: "nowrap" }}
+    >
+      {/* Main Feed */}
+      <Box flex={{ base: "100%", md: 70 }} maxW={{ md: "650px" }}>
+        {loading && (
+          <Flex justify="center" py={20}>
+            <Spinner size="xl" />
+          </Flex>
+        )}
+
+        {!loading && posts.length === 0 && (
+          <Text fontSize="lg" fontWeight="semibold" color={emptyTextColor} py={10} textAlign="center">
+            Follow some users to see their posts in your feed
+          </Text>
+        )}
+
+        {!loading &&
+          posts.map((post) => (
+            <Post key={post._id} post={post} postedBy={post.postedBy} />
+          ))}
+      </Box>
+
+      {/* Sidebar: Suggested Users */}
+      <Box
+        flex={{ base: "100%", md: 30 }}
+        display={{ base: "none", md: "block" }}
+        maxW={{ md: "350px" }}
+      >
+        <SuggestedUsers />
+      </Box>
+    </Flex>
+  );
 };
 
 export default HomePage;

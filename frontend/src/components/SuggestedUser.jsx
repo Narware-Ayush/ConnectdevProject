@@ -31,13 +31,13 @@ const SuggestedUser = ({ user }) => {
 					opacity: ".8",
 				}}
 			>
-				{following ? "Unfollow" : "Follow"}
+				{following ? "Disconnect" : "Connect"}
 			</Button>
 		</Flex>
 	);
 };
 
-export default SuggestedUser;
+export default SuggestedUser
 
 //  SuggestedUser component, if u want to copy and paste as shown in the tutorial
 

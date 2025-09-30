@@ -1,3 +1,4 @@
+
 import {
 	Flex,
 	Box,
@@ -24,23 +25,15 @@ import userAtom from "../atoms/userAtom";
 export default function SignupCard() {
 	const [showPassword, setShowPassword] = useState(false);
 	const setAuthScreen = useSetRecoilState(authScreenAtom);
-	const [inputs, setInputs] = useState({
-		name: "",
-		username: "",
-		email: "",
-		password: "",
-	});
-
-	const showToast = useShowToast();
 	const setUser = useSetRecoilState(userAtom);
+	const [inputs, setInputs] = useState({ name: "", username: "", email: "", password: "" });
+	const showToast = useShowToast();
 
 	const handleSignup = async () => {
 		try {
 			const res = await fetch("/api/users/signup", {
 				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(inputs),
 			});
 			const data = await res.json();
@@ -53,86 +46,93 @@ export default function SignupCard() {
 			localStorage.setItem("user-threads", JSON.stringify(data));
 			setUser(data);
 		} catch (error) {
-			showToast("Error", error, "error");
+			showToast("Error", error.message, "error");
 		}
 	};
 
+	// Theme-aware colors
+	const cardBg = useColorModeValue("white", "gray.800");
+	const inputBg = useColorModeValue("gray.50", "gray.700");
+	const buttonBg = useColorModeValue("blue.500", "blue.400");
+	const buttonHover = useColorModeValue("blue.600", "blue.500");
+	const textColor = useColorModeValue("gray.800", "gray.100");
+	const cardShadow = useColorModeValue("lg", "dark-lg");
+
 	return (
-		<Flex align={"center"} justify={"center"}>
-			<Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
-				<Stack align={"center"}>
-					<Heading fontSize={"4xl"} textAlign={"center"}>
+		<Flex minH="100vh" align="center" justify="center" bg={useColorModeValue("gray.50", "gray.900")} px={4}>
+			<Stack spacing={8} mx="auto" maxW="lg" py={12} px={6}>
+				<Stack align="center">
+					<Heading fontSize="4xl" textAlign="center" color={textColor}>
 						Sign up
 					</Heading>
 				</Stack>
-				<Box rounded={"lg"} bg={useColorModeValue("white", "gray.dark")} boxShadow={"lg"} p={8}>
+				<Box rounded="2xl" bg={cardBg} boxShadow={cardShadow} p={8} w={{ base: "full", sm: "450px" }}>
 					<Stack spacing={4}>
-						<HStack>
-							<Box>
-								<FormControl isRequired>
-									<FormLabel>Full name</FormLabel>
-									<Input
-										type='text'
-										onChange={(e) => setInputs({ ...inputs, name: e.target.value })}
-										value={inputs.name}
-									/>
-								</FormControl>
-							</Box>
-							<Box>
-								<FormControl isRequired>
-									<FormLabel>Username</FormLabel>
-									<Input
-										type='text'
-										onChange={(e) => setInputs({ ...inputs, username: e.target.value })}
-										value={inputs.username}
-									/>
-								</FormControl>
-							</Box>
+						<HStack spacing={4}>
+							<FormControl isRequired>
+								<FormLabel>Full Name</FormLabel>
+								<Input
+									bg={inputBg}
+									value={inputs.name}
+									onChange={(e) => setInputs({ ...inputs, name: e.target.value })}
+								/>
+							</FormControl>
+							<FormControl isRequired>
+								<FormLabel>Username</FormLabel>
+								<Input
+									bg={inputBg}
+									value={inputs.username}
+									onChange={(e) => setInputs({ ...inputs, username: e.target.value })}
+								/>
+							</FormControl>
 						</HStack>
+
 						<FormControl isRequired>
-							<FormLabel>Email address</FormLabel>
+							<FormLabel>Email Address</FormLabel>
 							<Input
-								type='email'
-								onChange={(e) => setInputs({ ...inputs, email: e.target.value })}
+								bg={inputBg}
+								type="email"
 								value={inputs.email}
+								onChange={(e) => setInputs({ ...inputs, email: e.target.value })}
 							/>
 						</FormControl>
+
 						<FormControl isRequired>
 							<FormLabel>Password</FormLabel>
 							<InputGroup>
 								<Input
+									bg={inputBg}
 									type={showPassword ? "text" : "password"}
-									onChange={(e) => setInputs({ ...inputs, password: e.target.value })}
 									value={inputs.password}
+									onChange={(e) => setInputs({ ...inputs, password: e.target.value })}
 								/>
-								<InputRightElement h={"full"}>
-									<Button
-										variant={"ghost"}
-										onClick={() => setShowPassword((showPassword) => !showPassword)}
-									>
+								<InputRightElement h="full">
+									<Button variant="ghost" onClick={() => setShowPassword((prev) => !prev)}>
 										{showPassword ? <ViewIcon /> : <ViewOffIcon />}
 									</Button>
 								</InputRightElement>
 							</InputGroup>
 						</FormControl>
+
 						<Stack spacing={10} pt={2}>
 							<Button
-								loadingText='Submitting'
-								size='lg'
-								bg={useColorModeValue("gray.600", "gray.700")}
-								color={"white"}
-								_hover={{
-									bg: useColorModeValue("gray.700", "gray.800"),
-								}}
+								loadingText="Submitting"
+								size="lg"
+								bg={buttonBg}
+								color="white"
+								_hover={{ bg: buttonHover }}
 								onClick={handleSignup}
+								borderRadius="xl"
+								boxShadow="md"
 							>
 								Sign up
 							</Button>
 						</Stack>
+
 						<Stack pt={6}>
-							<Text align={"center"}>
+							<Text align="center" color={textColor}>
 								Already a user?{" "}
-								<Link color={"blue.400"} onClick={() => setAuthScreen("login")}>
+								<Link color="blue.400" onClick={() => setAuthScreen("login")}>
 									Login
 								</Link>
 							</Text>

@@ -1,4 +1,14 @@
-import { Avatar, Divider, Flex, Image, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@chakra-ui/react";
+
+import {
+	Avatar,
+	Divider,
+	Flex,
+	Image,
+	Skeleton,
+	SkeletonCircle,
+	Text,
+	useColorModeValue,
+} from "@chakra-ui/react";
 import Message from "./Message";
 import MessageInput from "./MessageInput";
 import { useEffect, useRef, useState } from "react";
@@ -8,6 +18,7 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext.jsx";
 import messageSound from "../assets/sounds/message.mp3";
+
 const MessageContainer = () => {
 	const showToast = useShowToast();
 	const selectedConversation = useRecoilValue(selectedConversationAtom);
@@ -18,63 +29,57 @@ const MessageContainer = () => {
 	const setConversations = useSetRecoilState(conversationsAtom);
 	const messageEndRef = useRef(null);
 
+	const bgColor = useColorModeValue("gray.100", "gray.800");
+	const messageBg = useColorModeValue("white", "gray.700");
+	const ownMessageBg = useColorModeValue("blue.100", "blue.600");
+
 	useEffect(() => {
+		if (!socket) return;
+
 		socket.on("newMessage", (message) => {
 			if (selectedConversation._id === message.conversationId) {
 				setMessages((prev) => [...prev, message]);
 			}
 
-			// make a sound if the window is not focused
 			if (!document.hasFocus()) {
 				const sound = new Audio(messageSound);
 				sound.play();
 			}
 
-			setConversations((prev) => {
-				const updatedConversations = prev.map((conversation) => {
-					if (conversation._id === message.conversationId) {
-						return {
-							...conversation,
-							lastMessage: {
-								text: message.text,
-								sender: message.sender,
-							},
-						};
-					}
-					return conversation;
-				});
-				return updatedConversations;
-			});
+			setConversations((prev) =>
+				prev.map((conversation) =>
+					conversation._id === message.conversationId
+						? {
+								...conversation,
+								lastMessage: { text: message.text, sender: message.sender },
+						  }
+						: conversation
+				)
+			);
 		});
 
-		return () => socket.off("newMessage");
+		return () => socket && socket.off && socket.off("newMessage");
 	}, [socket, selectedConversation, setConversations]);
 
 	useEffect(() => {
-		const lastMessageIsFromOtherUser = messages.length && messages[messages.length - 1].sender !== currentUser._id;
-		if (lastMessageIsFromOtherUser) {
+		const lastMessageIsFromOtherUser =
+			messages.length && messages[messages.length - 1].sender !== currentUser._id;
+		if (lastMessageIsFromOtherUser && socket && socket.emit) {
 			socket.emit("markMessagesAsSeen", {
 				conversationId: selectedConversation._id,
 				userId: selectedConversation.userId,
 			});
 		}
 
-		socket.on("messagesSeen", ({ conversationId }) => {
-			if (selectedConversation._id === conversationId) {
-				setMessages((prev) => {
-					const updatedMessages = prev.map((message) => {
-						if (!message.seen) {
-							return {
-								...message,
-								seen: true,
-							};
-						}
-						return message;
-					});
-					return updatedMessages;
-				});
-			}
-		});
+		if (socket && socket.on) {
+			socket.on("messagesSeen", ({ conversationId }) => {
+				if (selectedConversation._id === conversationId) {
+					setMessages((prev) =>
+						prev.map((message) => ({ ...message, seen: true }))
+					);
+				}
+			});
+		}
 	}, [socket, currentUser._id, messages, selectedConversation]);
 
 	useEffect(() => {
@@ -106,40 +111,61 @@ const MessageContainer = () => {
 
 	return (
 		<Flex
-			flex='70'
-			bg={useColorModeValue("gray.200", "gray.dark")}
-			borderRadius={"md"}
+			flex="70"
+			flexDirection="column"
+			bg={bgColor}
+			borderRadius="md"
 			p={2}
-			flexDirection={"column"}
+			h="full"
 		>
-			{/* Message header */}
-			<Flex w={"full"} h={12} alignItems={"center"} gap={2}>
-				<Avatar src={selectedConversation.userProfilePic} size={"sm"} />
-				<Text display={"flex"} alignItems={"center"}>
-					{selectedConversation.username} <Image src='/verified.png' w={4} h={4} ml={1} />
+			{/* Header */}
+			<Flex
+				w="full"
+				h={16}
+				alignItems="center"
+				gap={3}
+				px={4}
+				borderBottom="1px solid"
+				borderColor={useColorModeValue("gray.300", "gray.600")}
+				flexShrink={0}
+			>
+				<Avatar src={selectedConversation.userProfilePic} size="md" />
+				<Text fontWeight="600" fontSize="md" display="flex" alignItems="center">
+					{selectedConversation.username}
+					<Image src="/verified.png" w={4} h={4} ml={1} />
 				</Text>
 			</Flex>
 
-			<Divider />
-
-			<Flex flexDir={"column"} gap={4} my={4} p={2} height={"400px"} overflowY={"auto"}>
+			{/* Messages */}
+			<Flex
+				flexDir="column"
+				flex="1"
+				p={4}
+				gap={3}
+				overflowY="auto"
+				scrollBehavior="smooth"
+				sx={{
+					"&::-webkit-scrollbar": { width: "6px" },
+					"&::-webkit-scrollbar-thumb": {
+						background: useColorModeValue("gray.400", "gray.600"),
+						borderRadius: "3px",
+					},
+				}}
+			>
 				{loadingMessages &&
 					[...Array(5)].map((_, i) => (
 						<Flex
 							key={i}
 							gap={2}
-							alignItems={"center"}
-							p={1}
-							borderRadius={"md"}
+							alignItems="center"
 							alignSelf={i % 2 === 0 ? "flex-start" : "flex-end"}
 						>
-							{i % 2 === 0 && <SkeletonCircle size={7} />}
-							<Flex flexDir={"column"} gap={2}>
-								<Skeleton h='8px' w='250px' />
-								<Skeleton h='8px' w='250px' />
-								<Skeleton h='8px' w='250px' />
+							{i % 2 === 0 && <SkeletonCircle size="8" />}
+							<Flex flexDir="column" gap={2}>
+								<Skeleton h="10px" w="200px" borderRadius="md" />
+								<Skeleton h="10px" w="150px" borderRadius="md" />
 							</Flex>
-							{i % 2 !== 0 && <SkeletonCircle size={7} />}
+							{i % 2 !== 0 && <SkeletonCircle size="8" />}
 						</Flex>
 					))}
 
@@ -147,14 +173,19 @@ const MessageContainer = () => {
 					messages.map((message) => (
 						<Flex
 							key={message._id}
-							direction={"column"}
 							ref={messages.length - 1 === messages.indexOf(message) ? messageEndRef : null}
+							justify={currentUser._id === message.sender ? "flex-end" : "flex-start"}
 						>
-							<Message message={message} ownMessage={currentUser._id === message.sender} />
+							<Message
+								message={message}
+								ownMessage={currentUser._id === message.sender}
+								bg={currentUser._id === message.sender ? ownMessageBg : messageBg}
+							/>
 						</Flex>
 					))}
 			</Flex>
 
+			{/* Message input */}
 			<MessageInput setMessages={setMessages} />
 		</Flex>
 	);

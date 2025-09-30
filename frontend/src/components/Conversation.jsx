@@ -7,8 +7,8 @@ import {
 	Stack,
 	Text,
 	WrapItem,
-	useColorMode,
 	useColorModeValue,
+	Tooltip,
 } from "@chakra-ui/react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
@@ -19,20 +19,20 @@ const Conversation = ({ conversation, isOnline }) => {
 	const user = conversation.participants[0];
 	const currentUser = useRecoilValue(userAtom);
 	const lastMessage = conversation.lastMessage;
-	const [selectedConversation, setSelectedConversation] = useRecoilState(selectedConversationAtom);
-	const colorMode = useColorMode();
+	const [selectedConversation, setSelectedConversation] = useRecoilState(
+		selectedConversationAtom
+	);
 
-	console.log("selectedConverstion", selectedConversation);
+	// Theme-aware colors
+	const selectedBg = useColorModeValue("gray.300", "gray.600");
+	const textColor = useColorModeValue("gray.800", "gray.100");
+	const subTextColor = useColorModeValue("gray.600", "gray.400");
+
 	return (
 		<Flex
 			gap={4}
-			alignItems={"center"}
-			p={"1"}
-			_hover={{
-				cursor: "pointer",
-				bg: useColorModeValue("gray.600", "gray.dark"),
-				color: "white",
-			}}
+			alignItems="center"
+			p={{ base: 2, md: 3 }}
 			onClick={() =>
 				setSelectedConversation({
 					_id: conversation._id,
@@ -43,42 +43,75 @@ const Conversation = ({ conversation, isOnline }) => {
 				})
 			}
 			bg={
-				selectedConversation?._id === conversation._id ? (colorMode === "light" ? "gray.400" : "gray.dark") : ""
+				selectedConversation?._id === conversation._id ? selectedBg : "transparent"
 			}
-			borderRadius={"md"}
+			borderRadius="lg"
+			border="none"
 		>
 			<WrapItem>
 				<Avatar
-					size={{
-						base: "xs",
-						sm: "sm",
-						md: "md",
-					}}
+					size={{ base: "sm", md: "md" }}
 					src={user.profilePic}
+					name={user.username}
 				>
-					{isOnline ? <AvatarBadge boxSize='1em' bg='green.500' /> : ""}
+					{isOnline && (
+						<AvatarBadge
+							boxSize="1em"
+							bg="green.400"
+							border="none"
+						/>
+					)}
 				</Avatar>
 			</WrapItem>
 
-			<Stack direction={"column"} fontSize={"sm"}>
-				<Text fontWeight='700' display={"flex"} alignItems={"center"}>
-					{user.username} <Image src='/verified.png' w={4} h={4} ml={1} />
+			<Stack spacing={0.5} flex="1" minW={0}>
+				<Text
+					fontWeight="600"
+					color={textColor}
+					display="flex"
+					alignItems="center"
+					fontSize={{ base: "sm", md: "md" }}
+					isTruncated
+				>
+					{user.username}
+					<Image src="/verified.png" w={4} h={4} ml={1} />
 				</Text>
-				<Text fontSize={"xs"} display={"flex"} alignItems={"center"} gap={1}>
-					{currentUser._id === lastMessage.sender ? (
-						<Box color={lastMessage.seen ? "blue.400" : ""}>
-							<BsCheck2All size={16} />
+
+				<Flex
+					fontSize="xs"
+					alignItems="center"
+					gap={1}
+					color={subTextColor}
+					minW={0}
+				>
+					{currentUser._id === lastMessage.sender && (
+						<Box color={lastMessage.seen ? "blue.400" : "gray.400"}>
+							<BsCheck2All size={14} />
 						</Box>
-					) : (
-						""
 					)}
-					{lastMessage.text.length > 18
-						? lastMessage.text.substring(0, 18) + "..."
-						: lastMessage.text || <BsFillImageFill size={16} />}
-				</Text>
+
+					<Tooltip
+						label={lastMessage.text || "Image"}
+						hasArrow
+						placement="top-start"
+						fontSize="sm"
+					>
+						<Text noOfLines={1} wordBreak="break-word">
+							{lastMessage.text ? (
+								lastMessage.text
+							) : (
+								<BsFillImageFill size={14} />
+							)}
+						</Text>
+					</Tooltip>
+				</Flex>
 			</Stack>
 		</Flex>
 	);
 };
 
 export default Conversation;
+
+
+
+
