@@ -1,6 +1,7 @@
 import userAtom from "../atoms/userAtom";
 import { useSetRecoilState } from "recoil";
 import useShowToast from "./useShowToast";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const useLogout = () => {
 	const setUser = useSetRecoilState(userAtom);
@@ -8,8 +9,9 @@ const useLogout = () => {
 
 	const logout = async () => {
 		try {
-			const res = await fetch("/api/users/logout", {
+			const res = await fetch(`${BASE_URL}/api/users/logout`, {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 				},

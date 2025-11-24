@@ -3,6 +3,7 @@ import { Box, Flex, Skeleton, SkeletonCircle, Text, useColorModeValue } from "@c
 import { useEffect, useState } from "react";
 import SuggestedUser from "./SuggestedUser";
 import useShowToast from "../hooks/useShowToast";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const SuggestedUsers = () => {
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,9 @@ const SuggestedUsers = () => {
     const getSuggestedUsers = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/users/suggested");
+        const res = await fetch(`${BASE_URL}/api/users/suggested`,{
+           credentials: "include"
+        });
         const data = await res.json();
         if (data.error) {
           showToast("Error", data.error, "error");

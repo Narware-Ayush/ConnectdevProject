@@ -17,6 +17,7 @@ import { useRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import usePreviewImg from "../hooks/usePreviewImg";
 import useShowToast from "../hooks/useShowToast";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function UpdateProfilePage() {
 	const [user, setUser] = useRecoilState(userAtom);
@@ -38,8 +39,9 @@ export default function UpdateProfilePage() {
 		if (updating) return;
 		setUpdating(true);
 		try {
-			const res = await fetch(`/api/users/update/${user._id}`, {
+			const res = await fetch(`${BASE_URL}/api/users/update/${user._id}`, {
 				method: "PUT",
+				credentials: "include",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ ...inputs, profilePic: imgUrl }),
 			});

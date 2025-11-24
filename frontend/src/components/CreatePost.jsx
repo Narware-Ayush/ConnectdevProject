@@ -28,6 +28,7 @@ import userAtom from "../atoms/userAtom";
 import useShowToast from "../hooks/useShowToast";
 import postsAtom from "../atoms/postsAtom";
 import { useParams } from "react-router-dom";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const MAX_CHAR = 500;
 
@@ -61,8 +62,9 @@ const CreatePost = () => {
   const handleCreatePost = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/posts/create", {
+      const res = await fetch(`${BASE_URL}/api/posts/create`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ postedBy: user._id, text: postText, img: imgUrl }),
       });

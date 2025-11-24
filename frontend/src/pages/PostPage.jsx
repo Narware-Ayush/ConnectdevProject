@@ -20,6 +20,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { DeleteIcon } from "@chakra-ui/icons";
 import postsAtom from "../atoms/postsAtom";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const PostPage = () => {
   const { user, loading } = useGetUserProfile();
@@ -28,6 +29,10 @@ const PostPage = () => {
   const { pid } = useParams();
   const currentUser = useRecoilValue(userAtom);
   const navigate = useNavigate();
+  
+  const textColor = useColorModeValue("gray.800", "gray.100");
+  const secondaryText = useColorModeValue("gray.500", "gray.400");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
 
   const currentPost = posts[0];
 
@@ -35,7 +40,9 @@ const PostPage = () => {
     const getPost = async () => {
       setPosts([]);
       try {
-        const res = await fetch(`/api/posts/${pid}`);
+        const res = await fetch(`${BASE_URL}/api/posts/${pid}`,{
+           credentials: "include"
+        });
         const data = await res.json();
         if (data.error) {
           showToast("Error", data.error, "error");
@@ -53,7 +60,9 @@ const PostPage = () => {
     try {
       if (!window.confirm("Are you sure you want to delete this post?")) return;
 
-      const res = await fetch(`/api/posts/${currentPost._id}`, {
+      const res = await fetch(`${BASE_URL}/api/posts/${currentPost._id}`,
+        
+         {
         method: "DELETE",
       });
       const data = await res.json();
@@ -78,9 +87,7 @@ const PostPage = () => {
 
   if (!currentPost) return null;
 
-  const textColor = useColorModeValue("gray.800", "gray.100");
-  const secondaryText = useColorModeValue("gray.500", "gray.400");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
+  
 
   return (
     <Box maxW="700px" mx="auto" my={6} px={2}>

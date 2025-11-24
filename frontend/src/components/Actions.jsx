@@ -19,6 +19,7 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import useShowToast from "../hooks/useShowToast";
 import postsAtom from "../atoms/postsAtom";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const Actions = ({ post }) => {
 	const user = useRecoilValue(userAtom);
@@ -36,8 +37,9 @@ const Actions = ({ post }) => {
 		if (isLiking) return;
 		setIsLiking(true);
 		try {
-			const res = await fetch("/api/posts/like/" + post._id, {
+			const res = await fetch(`${BASE_URL}/api/posts/like/` + post._id, {
 				method: "PUT",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 				},
@@ -78,8 +80,9 @@ const Actions = ({ post }) => {
 		if (isReplying) return;
 		setIsReplying(true);
 		try {
-			const res = await fetch("/api/posts/reply/" + post._id, {
+			const res = await fetch(`${BASE_URL}/api/posts/reply/` + post._id, {
 				method: "PUT",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 				},

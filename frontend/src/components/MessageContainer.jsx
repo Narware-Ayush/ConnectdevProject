@@ -18,6 +18,7 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { useSocket } from "../context/SocketContext.jsx";
 import messageSound from "../assets/sounds/message.mp3";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const MessageContainer = () => {
 	const showToast = useShowToast();
@@ -92,7 +93,9 @@ const MessageContainer = () => {
 			setMessages([]);
 			try {
 				if (selectedConversation.mock) return;
-				const res = await fetch(`/api/messages/${selectedConversation.userId}`);
+				const res = await fetch(`${BASE_URL}/api/messages/${selectedConversation.userId}`,{
+          credentials: "include",
+        });
 				const data = await res.json();
 				if (data.error) {
 					showToast("Error", data.error, "error");

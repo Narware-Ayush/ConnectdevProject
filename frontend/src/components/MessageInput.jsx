@@ -20,6 +20,7 @@ import { conversationsAtom, selectedConversationAtom } from "../atoms/messagesAt
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { BsFillImageFill } from "react-icons/bs";
 import usePreviewImg from "../hooks/usePreviewImg";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const MessageInput = ({ setMessages }) => {
 	const [messageText, setMessageText] = useState("");
@@ -39,8 +40,9 @@ const MessageInput = ({ setMessages }) => {
 		setIsSending(true);
 
 		try {
-			const res = await fetch("/api/messages", {
+			const res = await fetch(`${BASE_URL}/api/messages`, {
 				method: "POST",
+				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",
 				},

@@ -3,6 +3,8 @@ import http from "http";
 import express from "express";
 import Message from "../models/messageModel.js";
 import Conversation from "../models/conversationModel.js";
+import dotenv from "dotenv";
+import cors from "cors";
 
 const app = express();
 const server = http.createServer(app);
