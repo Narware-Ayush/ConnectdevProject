@@ -156,7 +156,7 @@ const ChatPage = () => {
           <form onSubmit={handleConversationSearch}>
             <Flex align="center" gap={2} mb={4}>
               <Input
-                placeholder="Search users..."
+                placeholder="Search by username..."
                 size="sm"
                 onChange={(e) => setSearchText(e.target.value)}
               />

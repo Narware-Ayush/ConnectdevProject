@@ -29,6 +29,7 @@ const Conversation = ({ conversation, isOnline }) => {
 	const subTextColor = useColorModeValue("gray.600", "gray.400");
 
 	return (
+		
 		<Flex
 			gap={4}
 			alignItems="center"
@@ -48,6 +49,8 @@ const Conversation = ({ conversation, isOnline }) => {
 			borderRadius="lg"
 			border="none"
 		>
+
+			
 			<WrapItem>
 				<Avatar
 					size={{ base: "sm", md: "md" }}
@@ -63,6 +66,8 @@ const Conversation = ({ conversation, isOnline }) => {
 					)}
 				</Avatar>
 			</WrapItem>
+
+			
 
 			<Stack spacing={0.5} flex="1" minW={0}>
 				<Text
