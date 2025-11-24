@@ -1,10 +1,14 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const protectRoute = async (req, res, next) => {
 	try {
 		const token = req.cookies.jwt;
 
+		console.log("ProtectRoute Token:", req.cookies);
 		if (!token) return res.status(401).json({ message: "Unauthorizedhai" });
 
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);

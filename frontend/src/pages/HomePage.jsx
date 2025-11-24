@@ -23,7 +23,9 @@ const HomePage = () => {
         const res = await fetch(`${BASE_URL}/api/posts/feed`,{
           credentials: "include",
         });
+       
         const data = await res.json();
+        
         if (data.error) {
           showToast("Error", data.error, "error");
           return;
