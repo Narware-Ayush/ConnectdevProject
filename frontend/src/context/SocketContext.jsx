@@ -15,7 +15,8 @@ export const SocketContextProvider = ({ children }) => {
 	const user = useRecoilValue(userAtom);
 
 	useEffect(() => {
-		const socket = io("/", {
+		const socket = io(import.meta.env.VITE_API_URL, {
+			withCredentials: true,
 			query: {
 				userId: user?._id,
 			},
