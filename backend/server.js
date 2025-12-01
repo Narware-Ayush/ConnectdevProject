@@ -12,7 +12,7 @@ import job from "./cron/cron.js";
 import cors from "cors";
 
 app.use(cors({
-	origin: ['http://localhost:3000'],
+	origin: ['http://localhost:3000',"https://connectdevproject-frontend.onrender.com"],
 	credentials: true,
 }));
 
